@@ -24,6 +24,10 @@ const myCLI = async () => {
                 searchText = await question('\nSearch for a film\n')
                 await search(searchText);
             }
+
+            if (chosenAction === '2') {
+                await displayFavourites();
+            }
             
         }
     } catch (err) {
@@ -31,11 +35,16 @@ const myCLI = async () => {
     } finally {
         await client.end();
         console.log("DISCONNECTED")
-}
+    }
 
     
 } 
 myCLI();
+
+async function displayFavourites () {
+    const queryResponse = await client.query(`SELECT movies.id, name, date, runtime, budget, revenue, vote_average, votes_count runtime FROM movies, favourites WHERE movies.id = favourites.movie_id`)
+    console.table(queryResponse.rows);
+}
 
 async function search (searchText: string) {
     const text = `SELECT id, name, date, runtime, budget, revenue, vote_average, votes_count runtime FROM movies WHERE LOWER(name) LIKE $1 ORDER BY date DESC LIMIT 10`
@@ -45,7 +54,7 @@ async function search (searchText: string) {
 
     if (queryResponse.rows.length > 0) {
         console.table(queryResponse.rows); 
-        console.log(displayQueryResults(queryResponse.rows))
+        console.log(displaySaveOptions(queryResponse.rows))
         const chosenFavouriteNum = await question(`\nChoose a film to add to favourites (1...10 OR 0 to CANCEL) `)
 
         if (chosenFavouriteNum !== '0' && Number(chosenFavouriteNum) < 11) {
@@ -57,13 +66,13 @@ async function search (searchText: string) {
             const addToFavouritesValues = [chosenFilmObj.id]
             await client.query(addToFavouritesQuery, addToFavouritesValues)
         }
-        
+
     } else {
         console.log("\nNO RESULTS \n")
     }
 }
 
-function displayQueryResults (queryResponseArr: {[key: string]: string}[]) {
+function displaySaveOptions(queryResponseArr: {[key: string]: string}[]) {
     for (const index in queryResponseArr) {
         const currentRow = queryResponseArr[index]
         console.log(`[${parseInt(index) + 1}]${currentRow.name}`)
