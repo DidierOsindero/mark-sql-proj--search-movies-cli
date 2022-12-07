@@ -12,25 +12,28 @@ const myCLI = async () => {
     await client.connect();
     let searchInput: string;
 
-    while (true) {
+    try {
+        while (true) {
             searchInput = await question('Type in a film name: \n')
             if (searchInput === 'q') {
                 break;
             }
-
             const text = `SELECT id, name, date, runtime, budget, revenue, vote_average, votes_count runtime FROM movies WHERE LOWER(name) LIKE $1 ORDER BY date DESC LIMIT 10`
             const values = [`%${searchInput.toLowerCase()}%`]
-
             const queryResponse = await client.query(text, values);
             console.log(`\nRESULTS: \n`)
-
             if (queryResponse.rows.length > 0) {
                 console.table(queryResponse.rows); 
             } else {
                 console.log("\nNO RESULTS \n")
             }
-    }
+        }
+    } catch (err) {
+        console.error(err.stack)
+    } finally {
+        await client.end();
+}
 
-    await client.end();
+    
 } 
 myCLI();
