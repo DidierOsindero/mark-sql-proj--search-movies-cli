@@ -42,9 +42,22 @@ async function search (searchText: string) {
     const values = [`%${searchText.toLowerCase()}%`]
     const queryResponse = await client.query(text, values);
     console.log(`\nRESULTS: \n`)
+
     if (queryResponse.rows.length > 0) {
         console.table(queryResponse.rows); 
         console.log(displayQueryResults(queryResponse.rows))
+        const chosenFavouriteNum = await question(`\nChoose a film to add to favourites (1...10 OR 0 to CANCEL) `)
+
+        if (chosenFavouriteNum !== '0' && Number(chosenFavouriteNum) < 11) {
+
+            const chosenFilmObj = queryResponse.rows[Number(chosenFavouriteNum)-1]
+            console.log(`SAVING: ${chosenFilmObj.name} \n\n`)
+
+            const addToFavouritesQuery = `INSERT INTO favourites (movie_id) VALUES ($1)`
+            const addToFavouritesValues = [chosenFilmObj.id]
+            await client.query(addToFavouritesQuery, addToFavouritesValues)
+        }
+        
     } else {
         console.log("\nNO RESULTS \n")
     }
@@ -52,8 +65,9 @@ async function search (searchText: string) {
 
 function displayQueryResults (queryResponseArr: {[key: string]: string}[]) {
     for (const index in queryResponseArr) {
-        const currentRow = queryResponseArr[index];
+        const currentRow = queryResponseArr[index]
         console.log(`[${parseInt(index) + 1}]${currentRow.name}`)
     }
+    console.log("[0] CANCEL")
     return ''
 }
