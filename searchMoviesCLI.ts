@@ -32,6 +32,7 @@ const myCLI = async () => {
         console.error(err.stack)
     } finally {
         await client.end();
+        console.log("Disconnected")
 }
 
     
