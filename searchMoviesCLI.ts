@@ -44,7 +44,16 @@ async function search (searchText: string) {
     console.log(`\nRESULTS: \n`)
     if (queryResponse.rows.length > 0) {
         console.table(queryResponse.rows); 
+        console.log(displayQueryResults(queryResponse.rows))
     } else {
         console.log("\nNO RESULTS \n")
     }
+}
+
+function displayQueryResults (queryResponseArr: {[key: string]: string}[]) {
+    for (const index in queryResponseArr) {
+        const currentRow = queryResponseArr[index];
+        console.log(`[${parseInt(index) + 1}]${currentRow.name}`)
+    }
+    return ''
 }
