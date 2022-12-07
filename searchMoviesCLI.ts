@@ -11,7 +11,6 @@ console.log("Welcome to search-movies-cli!");
 const myCLI = async () => {
     await client.connect();
     let searchInput: string;
-    
 
     while (true) {
             searchInput = await question('Type in a film name: \n')
@@ -19,12 +18,17 @@ const myCLI = async () => {
                 break;
             }
 
-            const text = `SELECT name, revenue, budget, votes_count, vote_average, runtime FROM movies WHERE LOWER(name) LIKE $1`
+            const text = `SELECT id, name, date, runtime, budget, revenue, vote_average, votes_count runtime FROM movies WHERE LOWER(name) LIKE $1 ORDER BY date DESC LIMIT 10`
             const values = [`%${searchInput.toLowerCase()}%`]
 
             const queryResponse = await client.query(text, values);
-            console.log(`RESULTS: \n`)
-            console.table(queryResponse.rows); 
+            console.log(`\nRESULTS: \n`)
+
+            if (queryResponse.rows.length > 0) {
+                console.table(queryResponse.rows); 
+            } else {
+                console.log("\nNO RESULTS \n")
+            }
     }
 
     await client.end();
